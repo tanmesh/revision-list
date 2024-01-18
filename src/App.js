@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 function App() {
   const [urls, setUrls] = useState([]);
   const [newUrl, setNewUrl] = useState('');
+  // eslint-disable-next-line
   const [selectedUrls, setSelectedUrls] = useState([]);
 
   useEffect(() => {
@@ -11,6 +12,7 @@ function App() {
       .then(data => setUrls(data));
   }, []);
 
+  // eslint-disable-next-line
   const handleSubmit = (e) => {
     e.preventDefault();
     const urlData = { url: newUrl, time: new Date(), checked: false };
@@ -27,7 +29,10 @@ function App() {
   };
 
   const handleCheckboxChange = (urlToChange) => {
-    const updatedUrl = { ...urlToChange, checked: !urlToChange.checked };
+    const updatedUrl = { ...urlToChange, checked: !urlToChange.checked, last_update: new Date() };
+
+    setUrls(prevUrls => prevUrls.map(url => url.title === urlToChange.title ? updatedUrl : url));
+
     fetch(`http://localhost:3000/urls/${urlToChange.id}`, {
       method: 'PUT',
       headers: {
@@ -49,6 +54,15 @@ function App() {
       window.open(randomUrl.url, '_blank');
     }
   };
+
+  const getDiff = (time) => {
+    const diff = (new Date() - new Date(time)) / (1000 * 60 * 60 * 24);
+    if (isNaN(diff)) {
+      return "";
+    } else {
+      return diff.toFixed(0) + " days ago";
+    }
+  }
 
   const styles = {
     container: {
@@ -100,15 +114,22 @@ function App() {
     tr: {
       transition: 'background-color 0.3s ease',
     },
+    td_style: {
+      'width': '350px',
+      'overflow-wrap': 'break-word',
+    }
   };
 
   return (
     <div style={styles.container}>
-      <form style={styles.form} onSubmit={handleSubmit}>
+      {/* <form style={styles.form} onSubmit={handleSubmit}>
         <input style={styles.input} value={newUrl} onChange={e => setNewUrl(e.target.value)} required />
         <button style={styles.button} type="submit">Add URL</button>
       </form>
+       */}
+
       <button style={styles.button} onClick={handlePick}>Pick a URL</button>
+
       <table style={styles.table}>
         <thead>
           <tr>
@@ -120,14 +141,15 @@ function App() {
         <tbody>
           {urls.sort((a, b) => {
             if (a.checked === b.checked) {
-              return new Date(b.time) - new Date(a.time);
+              return true;
+              // return new Date(b.time) - new Date(a.time);
             }
             return a.checked ? 1 : -1;
           }).map((item, index) => (
             <tr key={index} style={{ ...styles.tr, backgroundColor: item.checked ? 'lightgreen' : 'white' }}>
               <td style={styles.td}><input type="checkbox" checked={item.checked} onChange={() => handleCheckboxChange(item)} /></td>
-              <td style={styles.td}><a href={item.url}>{item.url}</a></td>
-              <td style={styles.td}>{new Date(item.time).toLocaleString().split(',')[0]}</td>
+              <td style={styles.td}><a href={item.url}>{item.title}</a></td>
+              <td style={styles.td}>{getDiff(item.last_update)}</td>
             </tr>
           ))}
         </tbody>
