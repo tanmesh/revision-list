@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 function App() {
+  const base_url = 'https://json-server-bxgtxzzi8-tanmesh.vercel.app'
   const [urls, setUrls] = useState([]);
   const [newUrl, setNewUrl] = useState('');
   // eslint-disable-next-line
   const [selectedUrls, setSelectedUrls] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:3000/urls')
-      .then(response => response.json())
+    axios.get(`${base_url}/revision-list/`)
+      .then(response => {
+        console.log(response.data);
+        response.json()
+      })
       .then(data => setUrls(data));
   }, []);
 
@@ -16,7 +21,7 @@ function App() {
   const handleSubmit = (e) => {
     e.preventDefault();
     const urlData = { url: newUrl, time: new Date(), checked: false };
-    fetch('http://localhost:3000/urls', {
+    axios.get(base_url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -33,7 +38,7 @@ function App() {
 
     setUrls(prevUrls => prevUrls.map(url => url.title === urlToChange.title ? updatedUrl : url));
 
-    fetch(`http://localhost:3000/urls/${urlToChange.id}`, {
+    axios.get(`${base_url}/revision-list/${urlToChange.id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
