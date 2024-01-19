@@ -2,7 +2,6 @@
   "name": "revision-list",
   "version": "0.1.0",
   "private": true,
-  "proxy": "https://json-server-bxgtxzzi8-tanmesh.vercel.app/",
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -16,7 +15,8 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "concurrently \"PORT=54545 react-scripts start\" \"PORT=54544 json-server --watch src/list.json\"",
+    "prod": "concurrently \"PORT=54545 serve -s build\" \"PORT=54544 json-server --watch src/list.json\"",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
